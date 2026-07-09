@@ -23,7 +23,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Для OCR также нужен системный пакет Tesseract:
+OCR работает без системного Tesseract — any2md автоматически скачает bundled бинарник и языковые данные (eng, rus, fra, deu, spa) при первом использовании.
+
+Если хотите использовать системный Tesseract, установите его вручную:
 
 ```bash
 sudo apt-get install tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng

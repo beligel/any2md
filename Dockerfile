@@ -3,11 +3,9 @@ FROM python:3.12-slim
 LABEL maintainer="MiMoCode User"
 
 RUN apt-get update -qq && apt-get install -y -qq \
-    tesseract-ocr \
-    tesseract-ocr-rus \
-    tesseract-ocr-eng \
     ffmpeg \
     libmagic1 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

@@ -17,16 +17,18 @@ PYVER=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'
 echo "Python: $PYVER"
 
 # Системные зависимости
+# Tesseract OCR больше не требуется — any2md скачает bundled бинарник при первом вызове OCR.
+# Оставляем ffmpeg/libmagic1 как полезные системные пакеты.
 if command -v apt-get &>/dev/null; then
-    echo "Установка системных зависимостей (tesseract, ffmpeg)..."
+    echo "Установка системных зависимостей (ffmpeg)..."
     sudo apt-get update -qq
-    sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng ffmpeg libmagic1
+    sudo apt-get install -y -qq ffmpeg libmagic1 || true
 elif command -v dnf &>/dev/null; then
-    sudo dnf install -y tesseract tesseract-langpack-rus tesseract-langpack-eng ffmpeg file-libs
+    sudo dnf install -y ffmpeg file-libs || true
 elif command -v pacman &>/dev/null; then
-    sudo pacman -Sy --noconfirm tesseract tesseract-data-rus tesseract-data-eng ffmpeg file
+    sudo pacman -Sy --noconfirm ffmpeg file || true
 else
-    echo "Предупреждение: не удалось автоматически установить tesseract/ffmpeg. Установите их вручную."
+    echo "Предупреждение: не удалось автоматически установить ffmpeg. Установите вручную, если нужна обработка аудио/видео."
 fi
 
 # venv

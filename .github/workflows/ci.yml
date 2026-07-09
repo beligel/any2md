@@ -24,7 +24,7 @@ jobs:
       - name: Install system deps
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng ffmpeg libmagic1
+          sudo apt-get install -y -qq ffmpeg libmagic1
 
       - name: Install Python deps
         run: |

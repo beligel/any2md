@@ -38,6 +38,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 whisper = ["openai-whisper>=20230314", "torch>=2.0"]
+ocr = ["pytesseract>=0.3.10"]
 
 [project.scripts]
 any2md = "any2md.cli:main"

@@ -107,15 +107,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
----
-
-## Поддержать разработку
-
-Если any2md оказался полезным, можно поддержать автора:
-
-- **USDT (TRC20):** `0x481E0A791dd9Dc0dBc9B20D81899E18786581442`
-- **BTC:** `bc1q9st9f7mzwzqje7ku9mnervme5ed7z0ytkvp2p4`
-- **ETH:** `0x481E0A791dd9Dc0dBc9B20D81899E18786581442`
+OCR работает без системного Tesseract — bundled версия с языками eng/rus/fra/deu/spa скачивается автоматически.
 
 ---
 

@@ -1,6 +1,7 @@
 """Утилиты any2md."""
 
 import logging
+import os
 import subprocess
 from pathlib import Path
 
@@ -24,6 +25,22 @@ def run_ocr(path: Path, lang: str = "eng") -> str:
     except ImportError:
         logger.warning("OCR недоступен: установите pytesseract и Pillow")
         return ""
+
+    try:
+        from .tesseract_bundled import get_tesseract_cmd
+        cmd, tessdata_prefix = get_tesseract_cmd()
+        if cmd:
+            pytesseract.pytesseract.tesseract_cmd = cmd
+            if tessdata_prefix:
+                os.environ["TESSDATA_PREFIX"] = tessdata_prefix
+                # bundled библиотеки лежат рядом с бинарником
+                lib_dir = str(Path(cmd).parent.parent / "lib" / "x86_64-linux-gnu")
+                if Path(lib_dir).exists():
+                    current = os.environ.get("LD_LIBRARY_PATH", "")
+                    if lib_dir not in current.split(os.pathsep):
+                        os.environ["LD_LIBRARY_PATH"] = f"{lib_dir}{os.pathsep}{current}".strip(os.pathsep)
+    except Exception as exc:
+        logger.warning("Не удалось настроить bundled tesseract: %s", exc)
 
     try:
         image = Image.open(path)
