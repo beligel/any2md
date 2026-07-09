@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+  <description>
+    <title-info>
+      <book-title>Тестовая книга</book-title>
+      <author><first-name>Иван</first-name><last-name>Тестов</last-name></author>
+    </title-info>
+  </description>
+  <body>
+    <section>
+      <p>Первая глава тестовой книги.</p>
+      <p>Вторая строка первой главы.</p>
+    </section>
+  </body>
+</FictionBook>

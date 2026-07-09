@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=any2md — Конвертер в Markdown
+Comment=Графический интерфейс для any2md
+Exec=/home/che/projects/any2md/.venv/bin/python /home/che/projects/any2md/any2md_gui.py
+Icon=/home/che/projects/any2md/icon.ico
+Terminal=false
+Type=Application
+Categories=Utility;TextEditor;

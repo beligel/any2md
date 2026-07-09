@@ -1,0 +1,28 @@
+# Ядро
+tqdm>=4.66
+
+# Офисные форматы
+python-docx>=1.1
+openpyxl>=3.1
+python-pptx>=0.6
+
+# PDF
+pypdf>=4.0
+
+# HTML/XML
+beautifulsoup4>=4.12
+lxml>=5.1
+
+# Изображения + OCR
+Pillow>=10.3
+pytesseract>=0.3.10
+
+# MIME-определение
+python-magic>=0.4.27
+
+# Аудио/видео (Whisper)
+openai-whisper>=20230314
+torch>=2.0
+
+# GUI
+ttkbootstrap>=1.10
