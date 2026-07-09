@@ -24,11 +24,23 @@ def register_extractor(mime_or_ext: str, extractor: Extractor | None = None) -> 
     """Регистрирует экстрактор для MIME-типа или расширения (с точкой).
 
     Поддерживает использование как декоратора: @register_extractor('.txt').
+    В реестре сохраняется обёртка, которая динамически разрешает текущую
+    функцию в модуле — это позволяет monkeypatch'ить экстракторы в тестах.
     """
 
     def _register(fn: Extractor) -> Extractor:
         key = mime_or_ext.lower()
-        _REGISTRY[key] = fn
+
+        def _proxy(path: Path, ctx: ExtractionContext) -> str:
+            import importlib
+            mod = importlib.import_module(_proxy._target_module)
+            real = getattr(mod, _proxy._target_name)
+            return real(path, ctx)
+
+        _proxy.__name__ = f"{fn.__name__}_proxy"
+        _proxy._target_module = fn.__module__
+        _proxy._target_name = fn.__name__
+        _REGISTRY[key] = _proxy
         return fn
 
     if extractor is None:
@@ -37,7 +49,11 @@ def register_extractor(mime_or_ext: str, extractor: Extractor | None = None) -> 
 
 
 def get_extractor(path: Path, mime: Optional[str] = None) -> Optional[Extractor]:
-    """Подбирает экстрактор по MIME, затем по расширению."""
+    """Подбирает экстрактор по расширению, затем по MIME (wildcard)."""
+    ext = path.suffix.lower()
+    if ext in _REGISTRY:
+        return _REGISTRY[ext]
+
     if mime:
         mime = mime.lower().split(";", 1)[0].strip()
         if mime in _REGISTRY:
@@ -47,5 +63,4 @@ def get_extractor(path: Path, mime: Optional[str] = None) -> Optional[Extractor]
         if category in _REGISTRY:
             return _REGISTRY[category]
 
-    ext = path.suffix.lower()
-    return _REGISTRY.get(ext)
+    return None
