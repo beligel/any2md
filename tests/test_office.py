@@ -136,3 +136,181 @@ def test_xlsx_markdown_table(tmp_path):
     assert "| Алиса | 30 |" in text
     # Разделитель markdown-таблицы
     assert "---" in text
+
+
+# ---------------------------------------------------------------------------
+# DOCX: списки (List Bullet / List Number)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(not HAS_DOCX, reason="python-docx не установлен")
+def test_docx_bullet_list(tmp_path):
+    """AC: List Bullet стили конвертируются в '- item'."""
+    doc = docx.Document()
+    for item in ["Яблоко", "Банан", "Вишня"]:
+        doc.add_paragraph(item, style="List Bullet")
+
+    src = tmp_path / "test.docx"
+    doc.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_docx(src, ctx)
+    assert "- Яблоко" in text
+    assert "- Банан" in text
+    assert "- Вишня" in text
+
+
+@pytest.mark.skipif(not HAS_DOCX, reason="python-docx не установлен")
+def test_docx_numbered_list(tmp_path):
+    """AC: List Number стили конвертируются в '1. item'."""
+    doc = docx.Document()
+    for item in ["Первый", "Второй"]:
+        doc.add_paragraph(item, style="List Number")
+
+    src = tmp_path / "test.docx"
+    doc.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_docx(src, ctx)
+    assert "1. Первый" in text
+    assert "1. Второй" in text
+
+
+@pytest.mark.skipif(not HAS_DOCX, reason="python-docx не установлен")
+def test_docx_underline(tmp_path):
+    """AC: underline runs конвертируются в <u>."""
+    doc = docx.Document()
+    p = doc.add_paragraph()
+    run = p.add_run("подчёркнутый")
+    run.underline = True
+
+    src = tmp_path / "test.docx"
+    doc.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_docx(src, ctx)
+    assert "<u>подчёркнутый</u>" in text
+
+
+# ---------------------------------------------------------------------------
+# XLSX: edge cases
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(not HAS_XLSX, reason="openpyxl не установлен")
+def test_xlsx_empty_sheet(tmp_path):
+    """AC: пустой лист не добавляет markdown-таблицу."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Пустой"
+    # Не добавляем строки
+
+    src = tmp_path / "test.xlsx"
+    wb.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_xlsx(src, ctx)
+    assert "## Лист: Пустой" in text
+    # Нет markdown-таблицы (нет строк)
+    assert "---" not in text
+
+
+@pytest.mark.skipif(not HAS_XLSX, reason="openpyxl не установлен")
+def test_xlsx_multiple_sheets(tmp_path):
+    """AC: несколько листов — каждый с заголовком."""
+    wb = openpyxl.Workbook()
+    ws1 = wb.active
+    ws1.title = "Лист1"
+    ws1.append(["A", "B"])
+
+    ws2 = wb.create_sheet("Лист2")
+    ws2.append(["X", "Y"])
+
+    src = tmp_path / "test.xlsx"
+    wb.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_xlsx(src, ctx)
+    assert "## Лист: Лист1" in text
+    assert "## Лист: Лист2" in text
+
+
+# ---------------------------------------------------------------------------
+# PPTX: edge cases
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(not HAS_PPTX, reason="python-pptx не установлен")
+def test_pptx_body_without_title(tmp_path):
+    """AC: слайд без title placeholder — только body текст."""
+    prs = Presentation()
+    # Используем layout без title (Blank)
+    slide_layout = prs.slide_layouts[6]  # Blank layout
+    slide = prs.slides.add_slide(slide_layout)
+    txBox = slide.shapes.add_textbox(100, 100, 500, 200)
+    tf = txBox.text_frame
+    tf.text = "Только body текст"
+
+    src = tmp_path / "test.pptx"
+    prs.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_pptx(src, ctx)
+    assert "Только body текст" in text
+    # Нет заголовка — не должно быть **Заголовок:**
+    assert "**Заголовок:**" not in text
+
+
+@pytest.mark.skipif(not HAS_PPTX, reason="python-pptx не установлен")
+def test_pptx_no_notes(tmp_path):
+    """AC: слайд без заметок — нет секции заметок."""
+    prs = Presentation()
+    slide_layout = prs.slide_layouts[6]  # Blank
+    slide = prs.slides.add_slide(slide_layout)
+    txBox = slide.shapes.add_textbox(100, 100, 500, 200)
+    tf = txBox.text_frame
+    tf.text = "Без заметок"
+
+    src = tmp_path / "test.pptx"
+    prs.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_pptx(src, ctx)
+    assert "Заметки" not in text
+
+
+@pytest.mark.skipif(not HAS_PPTX, reason="python-pptx не установлен")
+def test_pptx_empty_notes(tmp_path):
+    """AC: пустые заметки спикера — не попадают в вывод."""
+    prs = Presentation()
+    slide_layout = prs.slide_layouts[0]  # Title Slide
+    slide = prs.slides.add_slide(slide_layout)
+    slide.shapes.title.text = "Тест"
+    # Заметки пустые по умолчанию
+
+    src = tmp_path / "test.pptx"
+    prs.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_pptx(src, ctx)
+    assert "Тест" in text
+    # Пустые заметки не должны добавлять секцию
+    lines = [l for l in text.split("\n") if "Заметки к слайду" in l]
+    assert len(lines) == 0
+
+
+@pytest.mark.skipif(not HAS_PPTX, reason="python-pptx не установлен")
+def test_pptx_multiple_slides(tmp_path):
+    """AC: несколько слайдов — каждый с заголовком Слайд N."""
+    prs = Presentation()
+    for i in range(3):
+        slide_layout = prs.slide_layouts[6]  # Blank
+        slide = prs.slides.add_slide(slide_layout)
+        txBox = slide.shapes.add_textbox(100, 100, 500, 200)
+        txBox.text_frame.text = f"Слайд {i+1}"
+
+    src = tmp_path / "test.pptx"
+    prs.save(src)
+
+    ctx = ExtractionContext()
+    text = extract_pptx(src, ctx)
+    assert "## Слайд 1" in text
+    assert "## Слайд 2" in text
+    assert "## Слайд 3" in text
