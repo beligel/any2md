@@ -1,4 +1,4 @@
--e git+https://github.com/beligel/any2md.git@a0916f5315cb747c18c1e1dd3d31db7c88873b75#egg=any2md
+-e git+https://github.com/beligel/any2md.git@0cb1252642aa3da62725bdfb992828db4e79e43b#egg=any2md
 beautifulsoup4==4.15.0
 certifi==2026.6.17
 charset-normalizer==3.4.9

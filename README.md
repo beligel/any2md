@@ -43,6 +43,12 @@ python -m any2md.cli ./docs -o ./docs_md --recursive --workers 8
 # PDF/изображения с OCR
 python -m any2md.cli scan.pdf -o scan.md --ocr --ocr-lang eng+rus
 
+# Список поддерживаемых форматов
+python -m any2md.cli --list-formats
+
+# Вывод результата в stdout (pipe-friendly)
+python -m any2md.cli scan.pdf -o -
+
 # Аудио/видео с Whisper
 python -m any2md.cli podcast.mp3 -o podcast.md --language ru
 python -m any2md.cli lecture.mp4 -o lecture.md --whisper-model small --language en
@@ -101,4 +107,4 @@ any2md/
 - **BTC:** `bc1q9st9f7mzwzqje7ku9mnervme5ed7z0ytkvp2p4`
 - **ETH:** `0x481E0A791dd9Dc0dBc9B20D81899E18786581442`
 
-**Версия:** 0.2.0
+**Версия:** 0.2.1

@@ -3,7 +3,7 @@
 import html
 from pathlib import Path
 
-from ..utils import maybe_decode
+from ..core import maybe_decode
 from .registry import ExtractionContext, register_extractor
 
 

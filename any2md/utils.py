@@ -18,6 +18,25 @@ def maybe_decode(path: Path, encoding: str = "utf-8") -> str:
     return raw.decode("utf-8", errors="replace")
 
 
+def configure_tesseract() -> None:
+    """Настраивает pytesseract на bundled или системный tesseract."""
+    try:
+        import pytesseract
+        from .tesseract_bundled import get_tesseract_cmd
+        cmd, tessdata_prefix = get_tesseract_cmd()
+        if cmd:
+            pytesseract.pytesseract.tesseract_cmd = cmd
+            if tessdata_prefix:
+                os.environ["TESSDATA_PREFIX"] = tessdata_prefix
+                lib_dir = str(Path(cmd).parent.parent / "lib" / "x86_64-linux-gnu")
+                if Path(lib_dir).exists():
+                    current = os.environ.get("LD_LIBRARY_PATH", "")
+                    if lib_dir not in current.split(os.pathsep):
+                        os.environ["LD_LIBRARY_PATH"] = f"{lib_dir}{os.pathsep}{current}".strip(os.pathsep)
+    except Exception as exc:
+        logger.warning("Не удалось настроить bundled tesseract: %s", exc)
+
+
 def run_ocr(path: Path, lang: str = "eng") -> str:
     try:
         import pytesseract
@@ -26,21 +45,7 @@ def run_ocr(path: Path, lang: str = "eng") -> str:
         logger.warning("OCR недоступен: установите pytesseract и Pillow")
         return ""
 
-    try:
-        from .tesseract_bundled import get_tesseract_cmd
-        cmd, tessdata_prefix = get_tesseract_cmd()
-        if cmd:
-            pytesseract.pytesseract.tesseract_cmd = cmd
-            if tessdata_prefix:
-                os.environ["TESSDATA_PREFIX"] = tessdata_prefix
-                # bundled библиотеки лежат рядом с бинарником
-                lib_dir = str(Path(cmd).parent.parent / "lib" / "x86_64-linux-gnu")
-                if Path(lib_dir).exists():
-                    current = os.environ.get("LD_LIBRARY_PATH", "")
-                    if lib_dir not in current.split(os.pathsep):
-                        os.environ["LD_LIBRARY_PATH"] = f"{lib_dir}{os.pathsep}{current}".strip(os.pathsep)
-    except Exception as exc:
-        logger.warning("Не удалось настроить bundled tesseract: %s", exc)
+    configure_tesseract()
 
     try:
         image = Image.open(path)

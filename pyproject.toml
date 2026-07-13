@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "any2md"
-version = "0.2.0"
+version = "0.2.1"
 description = "Универсальный конвертер файлов в Markdown"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,6 +25,7 @@ dependencies = [
     "openpyxl>=3.1",
     "python-pptx>=0.6",
     "pypdf>=4.0",
+    "pdf2image>=1.17",
     "beautifulsoup4>=4.12",
     "lxml>=5.1",
     "Pillow>=10.3",
