@@ -163,12 +163,22 @@ def extract_pptx(path: Path, ctx: ExtractionContext) -> str:
     parts = []
     for i, slide in enumerate(prs.slides, 1):
         parts.append(f"## Слайд {i}")
+        title = None
+        body = []
         for shape in slide.shapes:
             if hasattr(shape, "text") and shape.text.strip():
-                parts.append(shape.text.strip())
+                if shape.is_placeholder and getattr(shape, "placeholder_format", None):
+                    pf = shape.placeholder_format
+                    if pf.type in {1, 3}:  # TITLE / CENTER_TITLE
+                        title = shape.text.strip()
+                        continue
+                body.append(shape.text.strip())
+        if title:
+            parts.append(f"**Заголовок:** {title}")
+        parts.extend(body)
         # Заметки спикера
-        if slide.has_notes_slide:
-            notes_text = slide.notes_slide.notes_text_frame.text.strip()
-            if notes_text:
-                parts.append(f"**Заметки:** {notes_text}")
+        if slide.has_notes_slide and slide.notes_slide:
+            notes_text_frame = slide.notes_slide.notes_text_frame
+            if notes_text_frame and notes_text_frame.text.strip():
+                parts.append(f"### Заметки к слайду {i}\n{notes_text_frame.text.strip()}")
     return "\n\n".join(parts)
