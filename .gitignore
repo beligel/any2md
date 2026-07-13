@@ -7,3 +7,8 @@ pytest_cache/
 output/
 *.log
 .any2md/
+
+# Test artifacts
+.coverage
+*.pdf
+BrinFat-Sila.md
