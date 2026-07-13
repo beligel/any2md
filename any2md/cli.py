@@ -55,7 +55,7 @@ def main(argv=None):
     input_path = Path(args.input)
     if not input_path.exists():
         print(f"Ошибка: путь не найден: {input_path}", file=sys.stderr)
-        return 1
+        raise SystemExit(1)
 
     stdout = args.output == "-"
 

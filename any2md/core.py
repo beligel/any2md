@@ -210,6 +210,10 @@ def convert(
                 return None
             return _convert_single_file(path, output_dir, ctx, keep_relative=True, root=input_path)
 
+        for f in files:
+            if _is_archive(f):
+                archives.append(f)
+
         file_list = [f for f in files if not _is_archive(f)]
         total_files = len(file_list)
 
